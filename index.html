@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Canto de Luna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#ece3d0; --ink-soft:#b6ad99; --gold:#d8b46a;
+    --bg:#080b14; --line:rgba(216,180,106,.22);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);overflow:hidden;}
+  body{font-family:'EB Garamond',Georgia,serif;font-size:19px;line-height:1.85;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+
+  .reader{position:fixed;inset:0;overflow:hidden;}
+  .track{display:flex;height:100%;width:100%;
+    transition:transform .55s cubic-bezier(.4,0,.2,1);will-change:transform;}
+  .page{min-width:100vw;width:100vw;height:100svh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .pageinner{min-height:100%;max-width:640px;margin:0 auto;padding:62px 30px 96px;
+    display:flex;flex-direction:column;justify-content:center;
+    opacity:0;transform:translateY(16px);transition:opacity .8s ease,transform .8s ease;}
+  .page.active .pageinner{opacity:1;transform:none;}
+
+  p{margin:0 0 1.25em;}
+  p:last-child{margin-bottom:0;}
+  a{color:var(--gold);text-decoration:none;border-bottom:1px solid var(--line);}
+
+  /* ---- COVER ---- */
+  .cover .pageinner{padding:0;justify-content:center;}
+  .cover{position:relative;}
+  .cover svg.sky{position:absolute;inset:0;width:100%;height:100%;z-index:0;}
+  .cover .veil{position:absolute;inset:0;background:radial-gradient(ellipse 120% 70% at 50% 28%,transparent 42%,rgba(8,11,20,.4) 100%);z-index:1;}
+  .cover .cap{position:relative;z-index:2;text-align:center;padding:0 24px;}
+  .kicker{font-style:italic;color:#f1ead9;letter-spacing:.32em;text-transform:uppercase;font-size:13px;opacity:.8;margin-bottom:18px;}
+  .cover h1{font-family:'Fraunces',serif;font-weight:400;color:#f6efe0;
+    font-size:clamp(50px,14vw,104px);line-height:1;margin:0;text-shadow:0 2px 40px rgba(0,0,0,.45);}
+  .cover .rule{width:64px;height:1px;background:rgba(246,239,224,.55);margin:26px auto 18px;}
+  .byline{font-style:italic;color:#efe7d6;letter-spacing:.18em;font-size:15px;opacity:.85;}
+  .hint{position:absolute;bottom:30px;left:0;right:0;z-index:2;text-align:center;color:#f1ead9;opacity:.62;
+    font-size:12px;letter-spacing:.25em;text-transform:uppercase;}
+
+  /* ---- TEXT PAGES ---- */
+  .epigraph .pageinner{text-align:center;}
+  .epigraph p{font-family:'Fraunces',serif;font-style:italic;font-size:clamp(23px,5.4vw,31px);
+    line-height:1.55;color:#f1e7d2;margin:0 auto;max-width:18em;}
+  .lead p:first-of-type::first-letter{font-family:'Fraunces',serif;float:left;
+    font-size:4.2em;line-height:.82;padding:6px 12px 0 0;color:var(--gold);font-weight:500;}
+
+  .poem .pageinner{text-align:center;padding:48px 26px 90px;}
+  .poem h3{font-family:'Fraunces',serif;font-weight:500;letter-spacing:.28em;
+    font-size:14px;color:var(--gold);text-transform:uppercase;margin:0 0 22px;}
+  .poem .stanza{font-style:italic;color:#e7dcc4;font-size:clamp(15px,4.2vw,18px);
+    line-height:1.62;margin:0 0 1.05em;}
+  .song{text-align:center;font-style:italic;color:var(--ink-soft);font-size:16px;margin:22px 0 0;}
+
+  .signoff{text-align:right;font-style:italic;color:var(--gold);font-size:22px;margin:24px 0 0;}
+  .closing-line .pageinner{text-align:center;}
+  .closing-line p{font-style:italic;color:var(--ink-soft);font-size:20px;max-width:24em;margin:0 auto;}
+  .closing-line .moon{width:24px;height:24px;opacity:.7;margin:0 auto 22px;display:block;}
+
+  /* ---- NAV ---- */
+  .nav{position:fixed;top:50%;transform:translateY(-50%);z-index:20;
+    width:46px;height:46px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(12,16,26,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    color:var(--gold);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:background .2s,opacity .2s;}
+  .nav:hover{background:rgba(20,26,42,.8);}
+  .nav svg{width:18px;height:18px;}
+  #prev{left:16px;} #next{right:16px;}
+  .counter{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:20;
+    font-size:12px;letter-spacing:.22em;color:var(--ink-soft);opacity:.7;}
+  @media(max-width:520px){
+    .nav{width:42px;height:42px;bottom:16px;top:auto;transform:none;}
+    #prev{left:18px;} #next{right:18px;}
+    .counter{bottom:24px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="reader">
+  <div class="track" id="track">
+
+    <!-- 0 · COVER -->
+    <section class="page cover"><div class="pageinner">
+      <svg class="sky" viewBox="0 0 1080 1620" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#070b1e"/><stop offset="34%" stop-color="#0f2238"/>
+            <stop offset="55%" stop-color="#1d5566"/><stop offset="74%" stop-color="#caa15a"/>
+            <stop offset="88%" stop-color="#e9a64e"/><stop offset="100%" stop-color="#f4c477"/>
+          </linearGradient>
+          <radialGradient id="moong" cx="38%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="#ffffff"/><stop offset="55%" stop-color="#eef3ff"/><stop offset="100%" stop-color="#cdd8ee"/>
+          </radialGradient>
+          <mask id="crescent">
+            <rect width="1080" height="1620" fill="black"/>
+            <circle cx="650" cy="430" r="156" fill="white"/>
+            <circle cx="592" cy="384" r="146" fill="black"/>
+          </mask>
+          <filter id="soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="24"/></filter>
+          <filter id="cloudblur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="22"/></filter>
+          <filter id="starglow" x="-300%" y="-300%" width="700%" height="700%"><feGaussianBlur stdDeviation="5"/></filter>
+        </defs>
+        <rect width="1080" height="1620" fill="url(#skyg)"/>
+        <circle cx="642" cy="424" r="150" fill="#c3d4f5" opacity="0.5" filter="url(#soft)"/>
+        <g mask="url(#crescent)"><circle cx="650" cy="430" r="156" fill="url(#moong)"/></g>
+        <g><circle cx="300" cy="300" r="22" fill="#ffffff" opacity="0.55" filter="url(#starglow)"/><circle cx="300" cy="300" r="6.5" fill="#ffffff"/></g>
+        <circle cx="180" cy="560" r="2.2" fill="#dfe7fb" opacity="0.7"/>
+        <circle cx="880" cy="240" r="2.4" fill="#dfe7fb" opacity="0.6"/>
+        <circle cx="470" cy="170" r="1.8" fill="#dfe7fb" opacity="0.5"/>
+        <g filter="url(#cloudblur)" fill="#0a1622">
+          <ellipse cx="240" cy="1300" rx="360" ry="60" opacity="0.85"/>
+          <ellipse cx="720" cy="1280" rx="420" ry="66" opacity="0.8"/>
+          <ellipse cx="540" cy="1340" rx="600" ry="70" opacity="0.9"/>
+        </g>
+        <rect x="0" y="1360" width="1080" height="260" fill="#0a1420" opacity="0.92"/>
+      </svg>
+      <div class="veil"></div>
+      <div class="cap">
+        <div class="kicker">Cartas que nunca te di</div>
+        <h1>Canto de Luna</h1>
+        <div class="rule"></div>
+        <div class="byline">JL</div>
+      </div>
+      <div class="hint">Toca la flecha →</div>
+    </div></section>
+
+    <!-- 1 · EPÍGRAFE -->
+    <section class="page epigraph"><div class="pageinner">
+      <p>Casi 10 años después de conocerte volví a sentirte de nuevo, te me apareciste en un sueño y después volviste a mí…</p>
+    </div></section>
+
+    <!-- 2 · PRELUDIO -->
+    <section class="page lead"><div class="pageinner">
+      <p>Exactamente hace 9 años entré a la etapa que más me ha marcado en mi vida, eres de esos errores que te abren el tercer ojo y de repente nunca nada vuelve a ser igual.</p>
+      <p>En marzo te vi de nuevo en un sueño, era verano y estaba con mis amigos bebiendo en un café bar en la costa de la playa, al momento de pagar la cuenta hasta el más inútil de mis sentidos se activó porque te vi en la calle esperando el semáforo para cruzar la calle, te reconocí por tu forma tan inusual de llevar tu pelo, sabía que eras tú.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Salí como un loco para hablarte, ya estabas cruzando la cebra y ya habías cruzado la calle.</p>
+      <p>Una vez más supe que no te iba a alcanzar y que aun sin importar el peso de las palabras que tenía que decirte, tenía que dejarte ir, y así fue, la vida siguió de nuevo, yo con mis palabras y tú con tu libertad tan tuya, al parecer encarné en un sueño toda mi historia en torno a ti después de haberte “borrado” de mi memoria.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Al despertarme me encontré con los buenos días de aquella mujer que tanto amaba en ese entonces, se me cayó esa máscara que llevaba encarnada en los nervios de mi cara y tan maquillada que había olvidado tener…</p>
+      <p>El dolor de continuar el día como si nada hubiera pasado fue la muestra más grande de hipocresía que alguna persona podría tener ante alguien que ama.</p>
+      <p>Ese fue el comienzo del final de esta historia que tanto me costó y del capítulo más extraño de mi vida.</p>
+    </div></section>
+
+    <!-- MÓDULO NUEVO REINO -->
+    <section class="page"><div class="pageinner">
+      <p>Aún recuerdo esos días de agosto como si fuera ayer, después de pasar por una tusa que me hizo dudar y cambiar quien era tuve que tomar la decisión de cambiar de colegio, tendría que cursar noveno grado de nuevo con la esperanza de dejar esa persona errática, imbécil y mediocre a la que me había acostumbrado a ser en mi vida anterior, pues, entendía la necesidad de cambiar para seguir creciendo como ser humano, el cerebro simplemente te pide experimentar distintas maneras de realizar la vida misma para seguir creciendo.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>El primer día que estuve en el Nuevo Reino fue algo muy distinto, mi hermana que estaba hasta ahora en la universidad me llevó al que sería un nuevo inicio, me costaba acostumbrarme a la idea de estudiar en un pueblo en la mitad de la montaña por lo mismo que nos da miedo comenzar algo nuevo, no tenía amigos, no conocía a nadie y básicamente no tenía herramientas las cuales me ayudaran a encontrar el cálido confort de pasar desapercibido como uno más del rebaño.</p>
+      <p>Con un cigarro mi hermana me acompañó antes de entrar, contándome cómo todo iba a mejorar y de cómo iba a tomar tiempo, en ese momento no entendía cómo una persona que no sabe de tu día a día podría tener tanta confianza de que otra persona podría hacer las cosas tan bien, era mi primera vez teniendo esa cercanía con ella.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Después de aparentar no tener nervios y sentir una extraña felicidad entramos a lo que sería mi segunda casa, la gente me miraba al principio de manera extraña, no sé si identificaban a leguas la ansiedad que me rodeaba por completo, nunca había tenido la sensación de ser el centro de atención ante tanta gente desconocida, seguramente y era rutinario escanear a las personas en un entorno tan normal para ellos, lo que era nuevo para mí era estar del otro lado, con un letrero de “no sé qué estoy haciendo en este lugar”.</p>
+      <p>Poco fue el tiempo que me tomó acostumbrarme a las personas y sentir una leve ventaja en cuanto al conocimiento que obtuve del bodrio de colegio en el que estaba, por primera vez sentí que reconocían a las personas por su lado humano y no intelectual, siempre fui un vago que no valora el esfuerzo que tienes que poner para llegar a competir por puestos tan banales que no te dejan enseñanzas más allá de cómo hacer que la vida funcione mejor.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Después de unos meses de quebrar el cascarón de la pena de compartir en un entorno donde no existe el “yo” pero sí existe el “todos” te vi por primera vez, encantado por tu naturalidad de ser y por la manera en cómo sonreías al hacer chistes sarcásticos, realmente fue la primera vez que desde lejos pude reconocer cómo una persona puede ser tan única y cómo puede llevar un encanto tan innato que cualquiera podría apreciarlo.</p>
+      <p>No fue mucho el tiempo que me costó relacionarme de manera en que pudiera conocerte, realmente no podría no conocerte, era un impulso natural que me llevaba a preguntarme qué te hace ser, por qué eres y quién eres.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Gracias a la música pude imaginar sobre esas tres preguntas, “La Espera” de Cultura Profética y “De Antes” me acompañaban a deducir respuestas complejas que desencadenaban en naturalmente preguntar por ti y en indagar sobre mis teorías hacia ti.</p>
+      <p>Pasando el tiempo era inevitable que no nos cruzáramos, hasta la más pequeña interacción contigo era compleja, pues no era nadie en tu mundo y la ansiedad de conocerte descompensaba mi cuerpo, la comparación de mis fuerzas unidas con algo tan grande en el espectro como eran mis teorías y mis sentimientos desarrollados hasta el momento hacían de mis palmas sudar y de mi mente un espacio en blanco, tan desequipado para luchar en contra de ellos, que hacía de mis palabras tan vagas y de esos momentos tan efímeros, que la calma y la furia de las emociones hacía de un momento tan sencillo una película entera sin pies ni cabeza.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>De camino hacia mi casa, tomando el bus de las 4:15 encajaba perfecto como un espacio perfecto para meditar sobre todo lo que sentía, pues 9 años después es una experiencia muy única, de la cual no podía escapar al ser nuevo en sentir tan profundo de acciones tan superficiales, pues vivía en mi cabeza gran parte del día.</p>
+      <p>Gracias a la ayuda de mis amigos salí parcialmente de esa zona en obra gris, que no sabía por qué la construía pero siempre estaba para mí.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>No voy a negar que no conocí más mujeres de la misma edad que siempre buscaban más conversación o más cosas que hacer para pasar el tiempo, pero al coordinarse el cerebro con el corazón para poder admirar algo de lo cual no tienes una respuesta, una forma completa, se inhibe ante factores externos, sentimentalmente nada tenía más importancia que el lograr descifrarte, así tuviese que guardar la espera e intentar dar cada paso de la manera más delicada posible para no matar posibilidad alguna de quedarme con la pregunta para siempre.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Cada día que pasaba siempre venía con algo nuevo, era nuevo para mí también entender que las mujeres sentían atracción por mí, pues, en la pubertad todo son hormonas y siempre estás esperando el momento para poder experimentar por primera vez muchas cosas.</p>
+      <p>Mirando hacia atrás me di cuenta de que el querer entender la complejidad de tu ser sin conocerte mucho siempre fue la voz de la razón que siempre escuché y que me mantuvo alejado de maneras tan banales de experimentar la pubertad, pues en mi mente no existía más la posibilidad de experimentar ni de ceder ante las posibilidades.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>El día que por fin pude tener de tu tiempo fue algo muy extraño, pues en mí las ansiedades convergieron en una paz que vibraba cálidamente de manera suave, las preocupaciones, los deberes, los dolores de mi ser desaparecían con tu presencia, fue un hito en mi historia sobre algo que supe que nunca más encontraría.</p>
+      <p>Escaparme para verte un rato o para hablar contigo de cualquier cosa realmente me hacía sentir en el lugar en el que había esperado estar, no tenía armas para defenderme, no podía escudarme ante nada ni quería hacerlo, ser vulnerable ante ti fue la primera vez que no me importó que hicieras de mí lo que quisieras, así fuera destruirme y acabar con mi corazón, estaría feliz porque hubieras sido tú, un privilegio bastante alto del cual nunca me arrepentiré de haberte dado.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>En mi memoria se quedaron grabadas escenas aleatorias de lo que alguna vez pudo ser, estar en el pasto viendo a las vacas correr, tu risa burlona, la manera en que el sol entraba en tus rizados cabellos y esas flores moradas que crecen en los árboles y que siempre me recordaron a ti.</p>
+      <p>La vida funciona de maneras extrañas, pero la mente aún más, de las mil oportunidades que tuve de realizar las cosas bien o de poder conocerte, novecientos cincuenta salieron de la manera errónea, nunca tuve los pantalones de ir más allá del decir que me gustabas, nunca hice más por poder hacer que las cosas funcionaran, claro es que viviendo tan lejos de Bogotá, siempre fue difícil verte, después de que el colegio cerrara en décimo, como quien cierra una historia fracasada donde me convertí en un mediocre y en una burla para ti, tuve la oportunidad de comenzar de nuevo en el San Rafa.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Mi corazón se quedó por mucho tiempo en el Nuevo Reino, nunca había experimentado qué se sentía no sentir, qué se sentía haber dejado todo lo que tienes adentro en otro lugar, y vivir sin nada en el corazón, no furia, no tristeza, no alegría, no amor.</p>
+      <p>Fue la primera vez en la que experimenté qué se siente que las personas te hallen atractivo e intentaran todo lo posible por conocerte y llegar a tener algo contigo, es extraño que la vida te enseñe cómo decir que no y cómo evitar que las personas lleguen a sentir lo que tú sentiste, pues creo que el punto más bajo de las emociones es no sentir, al menos cuando estás triste tienes motivos y tienes reacciones, no tener nada es devastador, más que eso es no tener un propósito y ver que por más días que pasen todos son iguales, nada mejora ni empeora.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>En el San Rafa también pude verte por última vez, cuando menos lo esperaba y cuando de nuevo no tenía armas ni motivos para defenderme, volví a sentir esa luz cálida que siempre emanó de ti, volví a sentirme en paz, mientras hablábamos para llegar a un lugar un poco más privado venía fabricando la mejor manera de por fin explicarte todo y poner mis emociones sobre la mesa para dejar de sufrir, preparé todo de manera en que pudieras entender y liberarme de un karma del cual a hoy en día no entiendo por qué pagué.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Cuando por fin llegamos y me dijiste como siempre con tu entre risa burlona “A ver, cuéntame”, la imposibilidad misma de la tierra y del ser humano atragantaron en mi garganta la furia que tenía de saber que fui un chiste para ti que te mantenía entretenida, de saber que por el mismísimo karma por más que quisiera odiarte te amaba tan profundamente porque sabía muy bien que después de ti no habría nada que se asemejara ni un pelo a todo lo que fue contigo, que miré al vacío y el mismo vacío me miró y me absorbió sin darme la más mínima de las posibilidades de hablarte y expresarte todo lo que eras y fuiste para mí.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Es una de las experiencias que nunca más en mi vida volví a repetir, fue un cierre de año que le dio la bienvenida a la pandemia, una época de estar encerrado con tantas emociones y pensamientos que por su peso me terminaron de hundir y que me dieron la opción de lo que pensé había sido el último adiós que no quería pero necesitaba, aunque nunca te pude volver a ver te escribí cartas sobre poemas como manera de catarsis.</p>
+      <p>Gracias a que la luna siempre me acompañó, te dediqué “Canto de luna”, un libro de poemas viejos y cortos, donde te dejé varias anotaciones de las incansables noches que no pude dormir por tanto que cargaba, una muestra de alguno que siempre te quise dar dice:</p>
+    </div></section>
+
+    <!-- POEMA 1 -->
+    <section class="page poem"><div class="pageinner">
+      <h3>Regalo Astral</h3>
+      <p class="stanza">Te regalo la luna<br>de pequeña creciente<br>y bisílabos sueños<br>plantaremos dentro.</p>
+      <p class="stanza">desde sitios lejanos<br>con rocío regamos<br>para que no se marchiten<br>en el zenit profundo.</p>
+      <p class="stanza">Crecerán azulosos<br>bajo danza celene<br>y a la par con el astro<br>se hincharán de quereres.</p>
+      <p class="stanza">Cuando llene tendremos<br>Madurados los sueños<br>Y en plateados luceros<br>Colgarán en el cielo.</p>
+      <p class="song">(dentro de las canciones que nunca te di está <a href="https://youtu.be/euAKRfi60Yk?si=PRE0-NHMHB42D_Xn" target="_blank" rel="noopener">esta</a>)</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Nunca fue realmente suficiente intentar sacar todo lo de adentro, después de un vasto periodo de depresión e intentos de terminar con todo encontré luz de nuevo en mi corazón, poco a poco volví a sentir y agradecí mucho el poder volver a sentir, el poder volver a empezar de nuevo sin miedo a mirar atrás, y así fue, ya no había más espera ni esperanzas de que la luna me hablara de ti, la conexión cesó y comencé de nuevo con un corazón roto en pedazos.</p>
+      <p>Decidí con el tiempo quedarme con esta historia para mí y solo para mí, comenzó a darme el peso que de verdad tiene decir y sentir amor, no como una palabra banal de la cual abusamos todos los días sino como una historia de qué tanto de verdad significa amar, qué tanto duele soltar por amor y que demuestra el simple acto de estar.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Hoy te agradezco por no haber estado, ya que tengo la capacidad de amar fácilmente, no en relaciones me refiero, pero a dar amor a los amigos, a los desconocidos que lo necesitan, a mi familia y sobre todo a mí mismo, nunca fue fácil pero hoy es el pilar más grande de mi vida.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Después de pensar que por fin te había olvidado y experimentar la vida de una manera más aventurada, volviste a mis recuerdos, nunca supe si fuiste tú o alguien con tu pelo y estatura, pero trabajando desde el CRAI de economía te vi en el primer piso de afuera, me tomó un buen momento pensar en las posibilidades de que fueras tú, en por qué tenías tú que estar ahí, porque después de tanto tiempo tendrías tú que aparecerte de manera tan simple de nuevo en mi vida cuando ya no tenías ni la más mínima cabida en mi pensamiento, por qué.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Cuando por fin decidí que podría ser más fácil volver a saludarte que mi parcial de Microeconomía salí corriendo del CRAI bajando la escalera para poder encontrarte, pero la vida siempre tiene la gracia de jugar contigo, no estabas más en ese lugar, siempre me quedé con la duda, aunque siempre pensé que no eras tú siempre quedó la intriga, como siempre ha funcionado en esta historia.</p>
+      <p>Esta fue la misma razón por la cual decidí escribirte, quería verte y entregarte el libro y además decirte todo lo que en un pasado no pude decirte, pero de nuevo no se dio.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>La vida siempre tiene esa gracia burlona que hace un tiempo tuviste, y realmente no me parece injusto, es necesario tenerla.</p>
+      <p>Pasados estos nueve años me seguiste en redes sociales después de soñarte y soñar que te dejaba ir, lo que me parece más irónico aún.</p>
+      <p>La verdad que los primeros dos días me hizo sentir de nuevo sensaciones que no sentía hace muchos años, pero sinceramente ya te había dejado ir, no importaba más.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Hablando contigo por redes sociales después de no hablarte por mucho tiempo me encontraste en mi faceta más madura, no puedo no ser honesto ni puedo ocultar cosas por más mínimo que sea, hoy soy transparente en cada paso de mi vida que doy.</p>
+      <p>Por esta misma razón hoy te escribo, porque sí, fuiste tú quien sin estar presente me demostró qué tan profundo puede llegar a ser el amor, porque sin amarme me demostraste que no estoy dispuesto a aceptar en mi vida nunca más, porque entendí que después de amar no se puede odiar y finalmente porque aquella mujer de expresión tan sincera fue y será el tipo de mujer que más paz y más calidez me ha dado en mi vida.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>Este es el final de la etapa que no había podido cerrar, quisiera haber podido hacer más por lo que nunca sucedió, quisiera haber podido derramar mis palabras contigo tomando café, pero la vida funciona de maneras en que siempre nos terminan beneficiando más, en mi caso las inmortalizo para ti.</p>
+      <p>Como una despedida, espero sigas teniendo esa luz cálida que irradia de ti tan naturalmente, sé que eres muy capaz, después de todo saber más de 6 idiomas no es para cualquiera y creo te demuestra qué tanto puedes llegar a hacer.</p>
+    </div></section>
+
+    <section class="page"><div class="pageinner">
+      <p>No te rindas, después de todo sigues teniendo proyectos que impactarán positivamente a la sociedad, lo mejor de todo es que nace de tu corazón y desde el amor, sigue creyendo en ti y aprecia a los que te rodean.</p>
+      <p>Desde cualquier parte en Colombia, un abrazo.</p>
+      <p class="signoff">Con cariño, JL.</p>
+    </div></section>
+
+    <!-- POEMA 2 -->
+    <section class="page poem"><div class="pageinner">
+      <h3>Evocando el Pasado</h3>
+      <p class="stanza">Hoy, desando lo andado.<br>He vuelto a todos los lugares<br>donde aún está el eco de nuestras voces<br>y nuestra agitada respiración.<br>Donde los paisajes que inspiraron nuestros versos<br>incólumes han quedado, esperando nuestro regreso.</p>
+      <p class="stanza">Hoy he vuelto con los ojos del recuerdo<br>a trasegar las urbes, a escuchar la música y los recitales.<br>También he ido, a donde quisimos ir y nunca fuimos;<br>el mar, el llano abierto, la finca de mi infancia.</p>
+      <p class="stanza">He regalado a mis silenciosos amigos el sonado libro<br>de poemas y ellos han devorado nuestros versos.<br>Con el peso del recuerdo a cuestas, subí aquellos caminos,<br>recorrí aquellos valles y miré diluir los sueños<br>en el caudal de los ríos y quebradas, en Pandi, Antioquia y otros lugares.</p>
+      <p class="stanza">En la quietud de Pedro Palo, entre aquel bosque<br>los pájaros trinaron mi nostalgia y las hormigas<br>acompañaron mi despedida.</p>
+      <p class="stanza">Estoy cansada. Caminaré hasta la cabaña<br>coronada de troncos, para que llena y vacía, de todo y de nada,<br>duerma bajo el alabastrino resplandor de la luna<br>y mañana… no sé si habrá mañana.</p>
+    </div></section>
+
+    <!-- CIERRE -->
+    <section class="page closing-line"><div class="pageinner">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 3a9 9 0 1 0 5 16 7 7 0 0 1-5-16z" fill="#d8b46a"/></svg>
+      <p>De nuevo volví a encontrarme en mi soledad, mis poemas y mis libros…</p>
+    </div></section>
+
+  </div>
+</div>
+
+<button class="nav" id="prev" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+<button class="nav" id="next" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+<div class="counter" id="counter">1 / 1</div>
+
+<script>
+  const track=document.getElementById('track');
+  const pages=[...document.querySelectorAll('.page')];
+  const prev=document.getElementById('prev'), next=document.getElementById('next'), counter=document.getElementById('counter');
+  let cur=0;
+  function go(n){
+    cur=Math.max(0,Math.min(pages.length-1,n));
+    track.style.transform='translate3d('+(-cur*100)+'vw,0,0)';
+    pages.forEach((p,i)=>p.classList.toggle('active',i===cur));
+    pages[cur].scrollTop=0;
+    prev.style.visibility=cur===0?'hidden':'visible';
+    next.style.visibility=cur===pages.length-1?'hidden':'visible';
+    counter.textContent=(cur+1)+' / '+pages.length;
+  }
+  prev.addEventListener('click',()=>go(cur-1));
+  next.addEventListener('click',()=>go(cur+1));
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(cur+1);}
+    if(e.key==='ArrowLeft'){go(cur-1);}
+  });
+  let sx=0,sy=0;
+  document.addEventListener('touchstart',e=>{sx=e.changedTouches[0].clientX;sy=e.changedTouches[0].clientY;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.4){ go(dx<0?cur+1:cur-1); }
+  },{passive:true});
+  go(0);
+</script>
+
+</body>
+</html>
